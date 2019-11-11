@@ -71,6 +71,9 @@ import org.springframework.web.util.UrlPathHelper;
 public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		implements HandlerMapping, Ordered, BeanNameAware {
 
+	/**
+	 * 默认处理器
+	 */
 	@Nullable
 	private Object defaultHandler;
 
@@ -78,8 +81,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	/**
+	 * 配置的拦截器数组
+	 */
 	private final List<Object> interceptors = new ArrayList<>();
 
+	/**
+	 * 初始化后的拦截器数组
+	 */
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	@Nullable
@@ -281,8 +290,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	@Override
 	protected void initApplicationContext() throws BeansException {
+		// 空方法，交给子类实现，用于注册自定义拦截器到interceptors中
 		extendInterceptors(this.interceptors);
+		// 扫描已注册的MappedInterceptor的bean们，添加到mappedInterceptors中
 		detectMappedInterceptors(this.adaptedInterceptors);
+		// 将interceptors初始化成MappedInterceptor类型，添加到mappedInterceptors中
 		initInterceptors();
 	}
 
@@ -390,19 +402,24 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// 获取处理器，该方法是抽象方法，由子类实现。
 		Object handler = getHandlerInternal(request);
+		// 获取不到，使用默认处理器
 		if (handler == null) {
 			handler = getDefaultHandler();
 		}
+		// 未设置默认处理器，则返回null
 		if (handler == null) {
 			return null;
 		}
 		// Bean name or resolved handler?
+		// handler是String，则从容器中查找String对应的bean类型作为处理器
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		// 获取HandlerExecutionChain
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -462,17 +479,21 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+		// 创建HandlerExecutionChain对象
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
-
+		//获得请求路径
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
+		// 遍历adaptedInterceptorss数组，获得与请求匹配的拦截器
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
+			// 需要匹配，如果路径匹配则添加到chain中
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
 				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}
 			}
+			// 无需匹配，直接添加到chain中
 			else {
 				chain.addInterceptor(interceptor);
 			}

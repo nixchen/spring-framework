@@ -86,6 +86,7 @@ public class DispatcherServletTests {
 
 	@BeforeEach
 	public void setUp() throws ServletException {
+		// <servlet>
 		MockServletConfig complexConfig = new MockServletConfig(getServletContext(), "complex");
 		// 模拟 web.xml <servlet> <initParam> 参数
 		complexConfig.addInitParameter("publishContext", "false");

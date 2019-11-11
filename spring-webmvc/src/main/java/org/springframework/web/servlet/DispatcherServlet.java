@@ -591,18 +591,23 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * we default to BeanNameUrlHandlerMapping.
 	 */
 	private void initHandlerMappings(ApplicationContext context) {
+		// 置空handlerMappings
 		this.handlerMappings = null;
 
+		// 如果开启探测功能，则扫描已注册的HandlerMapping的Bean们，添加到handlerMappings中
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+			// 扫描已注册的HandlerMapping的Bean们
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+			// 添加到handlerMappings中，并进行排序
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
 				AnnotationAwareOrderComparator.sort(this.handlerMappings);
 			}
 		}
+		// 如果关闭探测功能，则获取 HANDLER_MAPPING_BEAN_NAME 对应的 HandlerMapping 的Bean对象，并设置到handlerMappings中
 		else {
 			try {
 				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
@@ -615,6 +620,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
+		// 如果未获取到，则获取默认配置的HandlerMapping类
 		if (this.handlerMappings == null) {
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isTraceEnabled()) {
@@ -858,14 +864,21 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> List<T> getDefaultStrategies(ApplicationContext context, Class<T> strategyInterface) {
+		// 获得 strategyInterface 对应的value值
 		String key = strategyInterface.getName();
 		String value = defaultStrategies.getProperty(key);
+		// 创建value 对应的对象们，并返回
 		if (value != null) {
+			// 基于'，'分割，创建className 数组
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(value);
+			// 创建strategyInterface集合
 			List<T> strategies = new ArrayList<>(classNames.length);
+			// 遍历classNames 数组，创建对应的类，添加到strategyInterfaces中
 			for (String className : classNames) {
 				try {
+					// 获取className类
 					Class<?> clazz = ClassUtils.forName(className, DispatcherServlet.class.getClassLoader());
+					// 创建className对应的对象，并添加到stratgyInterface中
 					Object strategy = createDefaultStrategy(context, clazz);
 					strategies.add((T) strategy);
 				}
