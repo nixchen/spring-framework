@@ -88,6 +88,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	@Nullable
 	private ConfigurableEnvironment environment;
 
+	/**
+	 * 必须配置的属性集合
+	 */
 	private final Set<String> requiredProperties = new HashSet<>(4);
 
 
@@ -153,10 +156,13 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				// 将当前Servlet对象转换为BeanWrapper对象，从而能够将pvs注入到当前对象中
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+				// 注册自定义属性编辑器，一旦碰到 Resource 类型的属性，将会使用 ResourceEditor 进行解析
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				initBeanWrapper(bw);
+				// 将pvs中的init-param值注入到当前对象中，例如：FrameworkServlet#contextId
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {

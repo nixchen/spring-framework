@@ -357,7 +357,7 @@ public class ContextLoader {
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
 	protected Class<?> determineContextClass(ServletContext servletContext) {
-		// 读取<context-param>配置的contextClassName
+		// 读取<context-param>配置的contextClass
 		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
 		if (contextClassName != null) {
 			// 如果不为空,加载配置的WebApplicationContext类
