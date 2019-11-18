@@ -77,9 +77,11 @@ public class HandlerExecutionChain {
 	 * (in the given order) before the handler itself executes
 	 */
 	public HandlerExecutionChain(Object handler, @Nullable HandlerInterceptor... interceptors) {
+		// 如果是HandlerExecutionChain的实例
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
+			// 初始化interceptorList
 			this.interceptorList = new ArrayList<>();
 			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
 			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);

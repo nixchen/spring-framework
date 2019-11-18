@@ -77,8 +77,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Nullable
 	private Object defaultHandler;
 
+	/**
+	 * URL路径工具类
+	 */
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	/**
+	 * 路径匹配器
+	 */
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 	/**
@@ -292,7 +298,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected void initApplicationContext() throws BeansException {
 		// 空方法，交给子类实现，用于注册自定义拦截器到interceptors中
 		extendInterceptors(this.interceptors);
-		// 扫描已注册的MappedInterceptor的bean们，添加到mappedInterceptors中
+		// 扫描已注册的MappedInterceptor的bean们，添加到adaptedInterceptors中
 		detectMappedInterceptors(this.adaptedInterceptors);
 		// 将interceptors初始化成MappedInterceptor类型，添加到mappedInterceptors中
 		initInterceptors();
@@ -331,12 +337,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #adaptInterceptor
 	 */
 	protected void initInterceptors() {
+		// 遍历interceptors数组
 		if (!this.interceptors.isEmpty()) {
 			for (int i = 0; i < this.interceptors.size(); i++) {
+				// 获得interceptor对象
 				Object interceptor = this.interceptors.get(i);
 				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
+				// 将interceptor对象转化为HandlerInterceptor 添加到adaptedInterceptors数组中
 				this.adaptedInterceptors.add(adaptInterceptor(interceptor));
 			}
 		}
@@ -355,9 +364,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see WebRequestHandlerInterceptorAdapter
 	 */
 	protected HandlerInterceptor adaptInterceptor(Object interceptor) {
+		// 如果是HandlerInterceptor的实例直接返回
 		if (interceptor instanceof HandlerInterceptor) {
 			return (HandlerInterceptor) interceptor;
 		}
+		// 如果是WebRequestInterceptor的实例，则适配成WebRequestHandlerInterceptorAdapter返回
 		else if (interceptor instanceof WebRequestInterceptor) {
 			return new WebRequestHandlerInterceptorAdapter((WebRequestInterceptor) interceptor);
 		}

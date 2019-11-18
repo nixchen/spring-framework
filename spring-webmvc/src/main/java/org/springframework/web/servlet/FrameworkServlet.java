@@ -941,9 +941,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			throws ServletException, IOException {
 		//获得请求方法
 		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+		// 处理PATCH请求
 		if (httpMethod == HttpMethod.PATCH || httpMethod == null) {
 			processRequest(request, response);
 		} else {
+			// 调用父类处理其他请求，会根据请求方式的不同最终调用相应的doGet等方法
 			super.service(request, response);
 		}
 	}
