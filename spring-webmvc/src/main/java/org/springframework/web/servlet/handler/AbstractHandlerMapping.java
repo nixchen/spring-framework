@@ -404,6 +404,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 
 	/**
+	 *
+	 * 根据请求获取处理器和拦截器
 	 * Look up a handler for the given request, falling back to the default
 	 * handler if no specific one is found.
 	 * @param request current HTTP request
@@ -495,7 +497,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 		//获得请求路径
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
-		// 遍历adaptedInterceptorss数组，获得与请求匹配的拦截器
+		// 遍历adaptedInterceptors数组，获得与请求匹配的拦截器
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			// 需要匹配，如果路径匹配则添加到chain中
 			if (interceptor instanceof MappedInterceptor) {
